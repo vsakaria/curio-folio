@@ -62,7 +62,9 @@ export function FramePlate({
   const bandH = 0.6 + random() * 2.6;
   const arcSweep = 24 + random() * 62;
   const frequency = (0.01 + random() * 0.03).toFixed(3);
-  const dotGap = 4 + Math.round(random() * 4);
+  // Kept fine so the halftone still reads as texture when a plate is blown up
+  // to fill the lightbox rather than a thumbnail.
+  const dotGap = 2.2 + random() * 1.8;
   const dotAngle = Math.round(random() * 90);
   const composition = Math.floor(random() * 3);
   const stamp = `${String((numericSeed % 36) + 1).padStart(2, "0")}${String.fromCharCode(65 + (index % 6))}`;
@@ -111,7 +113,7 @@ export function FramePlate({
           <circle
             cx={dotGap / 2}
             cy={dotGap / 2}
-            r={0.72}
+            r={dotGap * 0.19}
             fill={palette.mark}
           />
         </pattern>

@@ -291,11 +291,14 @@ export function WorkList({
                 {openDiagram.context}
               </DialogDescription>
 
-              <div className="border-border bg-ink mt-5 overflow-x-auto border p-3">
-                <div className="min-w-[760px]">
+              <div className="border-border bg-ink pane-scroll mt-5 overflow-x-auto border p-3">
+                {/* Below this width the labels stop being readable, so scroll
+                    sideways rather than shrink any further. */}
+                <div className="min-w-[900px]">
                   <SystemDiagram diagram={openDiagram} />
                 </div>
               </div>
+              <p className="stage-label mt-2 sm:hidden">Scroll sideways</p>
 
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                 {DIAGRAM_LEGEND.map((entry) => (

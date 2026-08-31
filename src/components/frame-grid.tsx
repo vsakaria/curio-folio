@@ -19,21 +19,26 @@ function Visual({
   item,
   index,
   sizes,
+  fit = "cover",
   className,
 }: {
   item: FeedItem;
   index: number;
   sizes: string;
+  /** Tiles crop; the lightbox must not, since Instagram mixes aspect ratios. */
+  fit?: "cover" | "contain";
   className?: string;
 }) {
   const [broken, setBroken] = useState(false);
 
+  // Plates are generated to fill whatever frame they are given, so they always
+  // cover — there is no original composition to protect.
   if (!item.imageUrl || broken) {
     return (
       <FramePlate
         seed={item.id}
         index={index}
-        className={cn("h-full w-full object-cover", className)}
+        className={cn("h-full w-full", className)}
       />
     );
   }
@@ -45,7 +50,7 @@ function Visual({
       fill
       sizes={sizes}
       onError={() => setBroken(true)}
-      className={cn("object-cover", className)}
+      className={cn(fit === "cover" ? "object-cover" : "object-contain", className)}
     />
   );
 }
@@ -139,14 +144,15 @@ export function FrameGrid({
         open={active !== null}
         onOpenChange={(open) => !open && setOpenIndex(null)}
       >
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-3xl">
           {active && (
             <div className="grid gap-5">
-              <div className="bg-ink relative aspect-4/5 w-full overflow-hidden sm:aspect-3/2">
+              <div className="bg-ink relative aspect-4/5 max-h-[62dvh] w-full overflow-hidden sm:aspect-4/3">
                 <Visual
                   item={active}
                   index={openIndex ?? 0}
-                  sizes="(max-width: 640px) 92vw, 640px"
+                  fit="contain"
+                  sizes="(max-width: 640px) 92vw, 760px"
                 />
               </div>
 
