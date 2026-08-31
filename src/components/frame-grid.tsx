@@ -77,7 +77,7 @@ export function FrameGrid({
   return (
     <>
       {/* Container-relative, because this grid only ever fills half the stage. */}
-      <div className="@4xl:grid-cols-3 grid grid-cols-2 gap-px p-px">
+      <div className="@2xl:grid-cols-3 @5xl:grid-cols-4 grid grid-cols-2 gap-px p-px">
         {items.map((item, index) => (
           <button
             key={item.id}

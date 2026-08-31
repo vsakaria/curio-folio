@@ -33,9 +33,9 @@ export function Masthead() {
 
   return (
     <header className="border-border relative z-20 shrink-0 border-b">
-      <div className="curtain-rise px-5 py-6 sm:px-8 lg:px-10 lg:py-7">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-9">
-          <div className="flex items-center gap-5 lg:gap-7">
+      <div className="curtain-rise px-5 py-6 sm:px-8 lg:px-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-8">
+          <div className="flex shrink-0 items-center gap-5 lg:gap-7">
             <Portrait
               src={site.portrait.src}
               alt={site.portrait.alt}
@@ -52,7 +52,7 @@ export function Masthead() {
                 <span className="whitespace-nowrap">{site.location}</span>
               </p>
 
-              <h1 className="font-display mt-2 text-[2.1rem] leading-[0.92] tracking-[-0.025em] sm:text-5xl lg:text-[3.5rem]">
+              <h1 className="font-display mt-2 text-[2.1rem] leading-[0.92] tracking-[-0.025em] whitespace-nowrap sm:text-5xl lg:text-[2.9rem] xl:text-[3.4rem]">
                 <span className="text-bone">{firstName}</span>{" "}
                 <span className="text-brass-bright italic">
                   {restOfName.join(" ")}
