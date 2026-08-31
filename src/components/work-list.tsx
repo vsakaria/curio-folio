@@ -132,7 +132,7 @@ function DiagramCard({
         {diagram.summary}
       </p>
 
-      <div className="border-border/70 bg-ink/70 group-hover:border-brass/40 relative mt-4 h-36 overflow-hidden border transition-colors lg:h-44">
+      <div className="border-border/70 bg-ink group-hover:border-brass/40 relative mt-4 h-36 overflow-hidden border transition-colors lg:h-44">
         <SystemDiagram
           diagram={diagram}
           className="h-full w-full p-2 opacity-75 transition-opacity duration-500 group-hover:opacity-100"
@@ -289,7 +289,7 @@ export function WorkList({
                 {openDiagram.context}
               </DialogDescription>
 
-              <div className="border-border bg-ink/60 mt-5 overflow-x-auto border p-3">
+              <div className="border-border bg-ink mt-5 overflow-x-auto border p-3">
                 <div className="min-w-[760px]">
                   <SystemDiagram diagram={openDiagram} />
                 </div>

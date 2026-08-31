@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 import { site } from "@/content/site";
@@ -6,8 +8,17 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = `${site.name} — ${site.role}`;
 
-export default function OpenGraphImage() {
+// Bodoni is bundled rather than fetched so the card renders in the site's own
+// display face without a network call at build time.
+const FONT_DIR = join(process.cwd(), "src/assets");
+
+export default async function OpenGraphImage() {
   const [firstName, ...restOfName] = site.name.split(" ");
+
+  const [roman, italic] = await Promise.all([
+    readFile(join(FONT_DIR, "bodoni-moda-regular.ttf")),
+    readFile(join(FONT_DIR, "bodoni-moda-italic.ttf")),
+  ]);
 
   return new ImageResponse(
     (
@@ -22,7 +33,7 @@ export default function OpenGraphImage() {
             "linear-gradient(135deg, #0b0a09 0%, #141110 55%, #1d1512 100%)",
           padding: "72px 80px",
           color: "#ece2d0",
-          fontFamily: "serif",
+          fontFamily: "Bodoni Moda",
         }}
       >
         <div
@@ -84,11 +95,26 @@ export default function OpenGraphImage() {
           }}
         >
           <div style={{ display: "flex" }}>Frames</div>
-          <div style={{ display: "flex", color: "#b58a4a" }}>◆</div>
+          {/* A drawn lozenge rather than a glyph, so no font has to be
+              fetched at build time for a single decorative character. */}
+          <div
+            style={{
+              width: 12,
+              height: 12,
+              background: "#b58a4a",
+              transform: "rotate(45deg)",
+            }}
+          />
           <div style={{ display: "flex" }}>The Work</div>
         </div>
       </div>
     ),
-    size,
+    {
+      ...size,
+      fonts: [
+        { name: "Bodoni Moda", data: roman, style: "normal", weight: 400 },
+        { name: "Bodoni Moda", data: italic, style: "italic", weight: 400 },
+      ],
+    },
   );
 }

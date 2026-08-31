@@ -77,7 +77,7 @@ export const diagrams: Diagram[] = [
       {
         id: "gateway",
         label: "API gateway",
-        detail: "Auth · rate limit · idempotency key",
+        detail: "Auth · rate limit · dedupe",
         kind: "edge",
         col: 1,
         row: 1,
@@ -101,7 +101,7 @@ export const diagrams: Diagram[] = [
       {
         id: "outbox",
         label: "Outbox table",
-        detail: "Written in the same transaction",
+        detail: "Same transaction as the write",
         kind: "queue",
         col: 2,
         row: 2,
@@ -179,7 +179,7 @@ export const diagrams: Diagram[] = [
       {
         id: "cdn",
         label: "Edge cache",
-        detail: "stale-while-revalidate, 60s",
+        detail: "Stale-while-revalidate · 60s",
         kind: "edge",
         col: 1,
         row: 1,
@@ -336,7 +336,7 @@ export const diagrams: Diagram[] = [
       { from: "auth", to: "sessions", label: "issue / rotate" },
       { from: "auth", to: "product", label: "claims" },
       { from: "product", to: "audit", dashed: true },
-      { from: "auth", to: "audit", dashed: true, route: "under" },
+      { from: "auth", to: "audit", dashed: true },
     ],
     notes: [
       "The cookie is opaque. Nothing downstream can read it, so nothing downstream can be tricked by it.",

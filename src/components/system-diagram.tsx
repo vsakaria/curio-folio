@@ -78,6 +78,21 @@ export const DIAGRAM_LEGEND: Array<{ kind: DiagramNodeKind; label: string }> = [
   { kind: "external", label: "Third party" },
 ];
 
+/**
+ * SVG will happily let a label run out of its box, so shrink the type until it
+ * fits rather than clipping it. Advance widths are approximations per family.
+ */
+function fitFontSize(
+  text: string,
+  maxWidth: number,
+  baseSize: number,
+  advance: number,
+) {
+  const width = text.length * baseSize * advance;
+  if (width <= maxWidth) return baseSize;
+  return Math.max(baseSize * (maxWidth / width), 7);
+}
+
 function dedupe(points: Point[]): Point[] {
   return points.filter(
     (point, i) =>
@@ -143,29 +158,54 @@ function routeEdge(
   edge: DiagramEdge,
   from: Box,
   to: Box,
+  boxes: Box[],
   overY: number,
   underY: number,
 ): Point[] {
-  const route =
-    edge.route ??
-    (to.node.col < from.node.col && to.node.col !== from.node.col
-      ? "under"
-      : "auto");
+  const route = edge.route ?? "auto";
 
   if (route === "over" || route === "under") {
-    const channelY = route === "over" ? overY : underY;
+    const goingUp = route === "over";
+    const channelY = goingUp ? overY : underY;
     const goingRight = to.node.col >= from.node.col;
-    const exitX = from.cx + (goingRight ? 20 : -20);
-    const exitY = route === "over" ? from.top : from.bottom;
-    const approachX = goingRight ? to.left - 24 : to.right + 24;
+
+    // Leave the source towards the target, and come into the target's near
+    // side offset from its centre so a return edge never lands on top of the
+    // outbound one.
+    const exitX = from.cx + (goingRight ? 24 : -24);
+    const sideX = goingRight ? from.right + 22 : from.left - 22;
+    // Kept well clear of the mid-gap lane used by ordinary elbow edges.
+    const approachX = goingRight ? to.left - 16 : to.right + 16;
     const entryX = goingRight ? to.left : to.right;
+    const entryY = to.cy + (goingUp ? -13 : 13);
+
+    // Dropping straight to the channel would cut through anything stacked
+    // in the same column, so step sideways into the column gap first.
+    const obstructed = boxes.some(
+      (box) =>
+        box.node.col === from.node.col &&
+        (goingUp
+          ? box.node.row < from.node.row
+          : box.node.row > from.node.row),
+    );
+
+    const start: Point[] = obstructed
+      ? [
+          [exitX, goingUp ? from.top : from.bottom],
+          [exitX, goingUp ? from.top - ROW_GAP / 2 : from.bottom + ROW_GAP / 2],
+          [sideX, goingUp ? from.top - ROW_GAP / 2 : from.bottom + ROW_GAP / 2],
+          [sideX, channelY],
+        ]
+      : [
+          [exitX, goingUp ? from.top : from.bottom],
+          [exitX, channelY],
+        ];
 
     return [
-      [exitX, exitY],
-      [exitX, channelY],
+      ...start,
       [approachX, channelY],
-      [approachX, to.cy],
-      [entryX, to.cy],
+      [approachX, entryY],
+      [entryX, entryY],
     ];
   }
 
@@ -177,12 +217,16 @@ function routeEdge(
     ];
   }
 
-  const midX = (from.right + to.left) / 2;
+  const backwards = to.node.col < from.node.col;
+  const midX = backwards
+    ? (from.left + to.right) / 2
+    : (from.right + to.left) / 2;
+
   return [
-    [from.right, from.cy],
+    [backwards ? from.left : from.right, from.cy],
     [midX, from.cy],
     [midX, to.cy],
-    [to.left, to.cy],
+    [backwards ? to.right : to.left, to.cy],
   ];
 }
 
@@ -197,13 +241,7 @@ export function SystemDiagram({
   const rows = Math.max(...diagram.nodes.map((n) => n.row + 1));
 
   const usesOver = diagram.edges.some((edge) => edge.route === "over");
-  const usesUnder = diagram.edges.some(
-    (edge) =>
-      edge.route === "under" ||
-      (!edge.route &&
-        diagram.nodes.find((n) => n.id === edge.to)!.col <
-          diagram.nodes.find((n) => n.id === edge.from)!.col),
-  );
+  const usesUnder = diagram.edges.some((edge) => edge.route === "under");
 
   const topPad = LANE_H + (usesOver ? CHANNEL : 8);
   const bottomPad = usesUnder ? CHANNEL + 14 : 14;
@@ -231,6 +269,7 @@ export function SystemDiagram({
     });
   }
 
+  const allBoxes = [...boxes.values()];
   const overY = topPad - CHANNEL + 4;
   const underY = topPad + gridH + CHANNEL - 6;
   const uid = `dg-${diagram.slug}`;
@@ -260,14 +299,16 @@ export function SystemDiagram({
         const x = PAD_X + i * (COL_W + COL_GAP);
         return (
           <g key={lane}>
-            {i > 0 && (
-              <line
-                x1={x - COL_GAP / 2}
-                y1={LANE_H - 14}
-                x2={x - COL_GAP / 2}
-                y2={height - 6}
-                stroke="var(--border)"
-                strokeDasharray="2 6"
+            {/* Bands rather than rules: the grouping reads without adding
+                vertical lines for edges to get lost against. */}
+            {i % 2 === 1 && (
+              <rect
+                x={x - COL_GAP / 2}
+                y={LANE_H - 16}
+                width={COL_W + COL_GAP}
+                height={height - LANE_H + 10}
+                fill="var(--bone)"
+                opacity="0.018"
               />
             )}
             <text
@@ -290,7 +331,7 @@ export function SystemDiagram({
         const to = boxes.get(edge.to);
         if (!from || !to) return null;
 
-        const points = routeEdge(edge, from, to, overY, underY);
+        const points = routeEdge(edge, from, to, allBoxes, overY, underY);
         const [labelX, labelY] = midpointOf(points);
         const labelWidth = edge.label ? edge.label.length * 5.4 + 12 : 0;
 
@@ -337,6 +378,11 @@ export function SystemDiagram({
       {diagram.nodes.map((node) => {
         const box = boxes.get(node.id)!;
         const style = KIND_STYLE[node.kind];
+        const maxTextWidth = COL_W - 20;
+        const labelSize = fitFontSize(node.label, maxTextWidth, 13.5, 0.53);
+        const detailSize = node.detail
+          ? fitFontSize(node.detail, maxTextWidth, 9.5, 0.6)
+          : 0;
         return (
           <g key={node.id}>
             <rect
@@ -363,7 +409,7 @@ export function SystemDiagram({
               y={node.detail ? box.cy - 2 : box.cy + 4}
               textAnchor="middle"
               fill="var(--bone)"
-              fontSize="13.5"
+              fontSize={labelSize}
               fontFamily="var(--font-sans), system-ui, sans-serif"
             >
               {node.label}
@@ -374,7 +420,7 @@ export function SystemDiagram({
                 y={box.cy + 15}
                 textAnchor="middle"
                 fill="var(--smoke)"
-                fontSize="9.5"
+                fontSize={detailSize}
                 fontFamily="var(--font-mono), ui-monospace, monospace"
               >
                 {node.detail}
