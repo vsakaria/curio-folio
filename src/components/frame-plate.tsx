@@ -12,6 +12,9 @@ const PALETTES: Array<{ from: string; to: string; mark: string }> = [
   { from: "#b58a4a", to: "#17120c", mark: "#ece2d0" },
   { from: "#2a2f3d", to: "#0b0a09", mark: "#b58a4a" },
   { from: "#c8102e", to: "#190a0b", mark: "#ece2d0" },
+  { from: "#5c4a2a", to: "#100c07", mark: "#e3c98f" },
+  { from: "#1f3b3a", to: "#080d0d", mark: "#8fb8ae" },
+  { from: "#4a2338", to: "#120a10", mark: "#d99bb4" },
 ];
 
 function hashSeed(value: string) {
@@ -48,15 +51,20 @@ export function FramePlate({
   const palette = PALETTES[numericSeed % PALETTES.length];
   const uid = `plate-${numericSeed.toString(36)}`;
 
-  const angle = Math.round(random() * 140 - 70);
-  const orbX = 20 + random() * 60;
-  const orbY = 18 + random() * 54;
-  const orbR = 16 + random() * 26;
-  const bandY = 24 + random() * 52;
-  const bandH = 1 + random() * 3;
-  const arcSweep = 30 + random() * 50;
-  const frequency = (0.012 + random() * 0.02).toFixed(3);
-  const dotGap = 5 + Math.round(random() * 3);
+  const angle = Math.round(random() * 320 - 160);
+  const orbX = 14 + random() * 72;
+  const orbY = 14 + random() * 70;
+  const orbR = 14 + random() * 30;
+  const horizonY = 34 + random() * 60;
+  const horizonTilt = random() * 22 - 11;
+  const horizonDepth = 8 + random() * 34;
+  const bandY = 18 + random() * 80;
+  const bandH = 0.6 + random() * 2.6;
+  const arcSweep = 24 + random() * 62;
+  const frequency = (0.01 + random() * 0.03).toFixed(3);
+  const dotGap = 4 + Math.round(random() * 4);
+  const dotAngle = Math.round(random() * 90);
+  const composition = Math.floor(random() * 3);
   const stamp = `${String((numericSeed % 36) + 1).padStart(2, "0")}${String.fromCharCode(65 + (index % 6))}`;
 
   return (
@@ -98,6 +106,7 @@ export function FramePlate({
           width={dotGap}
           height={dotGap}
           patternUnits="userSpaceOnUse"
+          patternTransform={`rotate(${dotAngle})`}
         >
           <circle
             cx={dotGap / 2}
@@ -118,6 +127,52 @@ export function FramePlate({
         style={{ mixBlendMode: "overlay" }}
       />
       <circle cx={orbX} cy={orbY} r={orbR} fill={`url(#${uid}-orb)`} />
+
+      {/* Three loose compositions so a grid of plates does not read as one
+          repeated texture: a horizon, a stack of rules, or an arc study. */}
+      {composition === 0 && (
+        <path
+          d={`M -6 ${horizonY} L 106 ${horizonY + horizonTilt} L 106 ${horizonY + horizonTilt + horizonDepth} L -6 ${horizonY + horizonDepth} Z`}
+          fill="#000"
+          opacity="0.4"
+        />
+      )}
+
+      {composition === 1 &&
+        [0, 1, 2, 3].map((i) => (
+          <path
+            key={i}
+            d={`M -6 ${bandY + i * (5 + arcSweep / 14)} L 106 ${bandY + i * (5 + arcSweep / 14) + horizonTilt}`}
+            stroke={palette.mark}
+            strokeWidth={bandH * (1 - i * 0.18)}
+            opacity={0.26 - i * 0.05}
+            fill="none"
+          />
+        ))}
+
+      {composition === 2 && (
+        <>
+          <circle
+            cx={100 - orbX}
+            cy={125 - orbY}
+            r={orbR * 0.55}
+            fill="none"
+            stroke={palette.mark}
+            strokeWidth="0.5"
+            opacity="0.45"
+          />
+          <circle
+            cx={100 - orbX}
+            cy={125 - orbY}
+            r={orbR * 0.9}
+            fill="none"
+            stroke={palette.mark}
+            strokeWidth="0.35"
+            opacity="0.28"
+          />
+        </>
+      )}
+
       <rect
         width="100"
         height="125"

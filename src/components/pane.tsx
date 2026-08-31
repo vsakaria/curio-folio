@@ -48,7 +48,7 @@ export function Pane({
         </p>
       </div>
 
-      <div className="pane-scroll flex-1 lg:min-h-0 lg:overflow-y-auto">
+      <div className="pane-scroll @container flex-1 lg:min-h-0 lg:overflow-y-auto">
         {children}
       </div>
     </section>

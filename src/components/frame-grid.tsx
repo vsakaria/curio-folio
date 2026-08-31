@@ -76,7 +76,8 @@ export function FrameGrid({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-px p-px 2xl:grid-cols-3">
+      {/* Container-relative, because this grid only ever fills half the stage. */}
+      <div className="@4xl:grid-cols-3 grid grid-cols-2 gap-px p-px">
         {items.map((item, index) => (
           <button
             key={item.id}
@@ -87,7 +88,7 @@ export function FrameGrid({
             <Visual
               item={item}
               index={index}
-              sizes="(max-width: 1024px) 50vw, (max-width: 1600px) 25vw, 17vw"
+              sizes="(max-width: 1024px) 50vw, 25vw"
               className="transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             />
 

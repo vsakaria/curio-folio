@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,14 @@ export function Portrait({
   sizePx?: number;
 }) {
   const [failed, setFailed] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  // The server-rendered <img> can finish failing before React hydrates, in
+  // which case onError never fires. Check the outcome once on mount too.
+  useEffect(() => {
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth === 0) setFailed(true);
+  }, []);
 
   const initials = name
     .split(" ")
@@ -54,12 +62,13 @@ export function Portrait({
       ) : (
         // eslint-disable-next-line @next/next/no-img-element -- a single fixed-size asset with an onError fallback
         <img
+          ref={imageRef}
           src={src}
           alt={alt}
           width={sizePx}
           height={sizePx}
           onError={() => setFailed(true)}
-          className="h-full w-full object-cover"
+          className="text-ink h-full w-full object-cover text-[0px]"
         />
       )}
       <div

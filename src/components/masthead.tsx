@@ -45,11 +45,11 @@ export function Masthead() {
             />
 
             <div className="min-w-0">
-              <p className="stage-label flex items-center gap-2.5">
-                <span className="bg-flash inline-block size-1.5 rounded-full" />
-                {site.role}
+              <p className="stage-label flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                <span className="bg-flash inline-block size-1.5 shrink-0 rounded-full" />
+                <span className="whitespace-nowrap">{site.role}</span>
                 <span className="text-brass/50">/</span>
-                {site.location}
+                <span className="whitespace-nowrap">{site.location}</span>
               </p>
 
               <h1 className="font-display mt-2 text-[2.1rem] leading-[0.92] tracking-[-0.025em] sm:text-5xl lg:text-[3.5rem]">
@@ -64,6 +64,12 @@ export function Masthead() {
               </p>
             </div>
           </div>
+
+          {/* The introduction sits alongside the name once there is room for a
+              column, and directly under it when there is not. */}
+          <p className="text-smoke max-w-prose text-[0.8rem] leading-relaxed xl:hidden">
+            {site.intro}
+          </p>
 
           <p className="text-smoke hidden max-w-[22rem] border-l pl-6 text-[0.8rem] leading-relaxed xl:block">
             {site.intro}

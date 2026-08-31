@@ -132,12 +132,14 @@ function DiagramCard({
         {diagram.summary}
       </p>
 
-      <div className="border-border/70 bg-ink group-hover:border-brass/40 relative mt-4 h-36 overflow-hidden border transition-colors lg:h-44">
-        <SystemDiagram
-          diagram={diagram}
-          className="h-full w-full p-2 opacity-75 transition-opacity duration-500 group-hover:opacity-100"
-        />
-        <span className="from-ink pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t to-transparent" />
+      {/* Shown as a crop rather than shrunk to fit: at full width the labels
+          would be too small to read, and an unreadable diagram is decoration. */}
+      <div className="border-border/70 bg-ink group-hover:border-brass/40 relative mt-4 h-40 overflow-hidden border transition-colors lg:h-48">
+        <div className="absolute top-0 left-0 w-[140%] origin-top-left opacity-80 transition-opacity duration-500 group-hover:opacity-100">
+          <SystemDiagram diagram={diagram} />
+        </div>
+        <span className="from-ink pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l to-transparent" />
+        <span className="from-ink pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t to-transparent" />
         <span className="border-brass/40 bg-ink/90 text-brass-bright absolute right-2 bottom-2 flex items-center gap-1.5 border px-2 py-1 font-mono text-[0.6rem] tracking-[0.16em] uppercase opacity-0 transition-opacity group-hover:opacity-100">
           <Expand className="size-2.5" />
           Open
