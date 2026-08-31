@@ -57,7 +57,7 @@ export function Masthead() {
             />
 
             <div className="min-w-0">
-              <p className="stage-label flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <p className="stage-label flex flex-wrap items-center gap-x-2.5 gap-y-1 max-sm:tracking-[0.16em]">
                 <span className="bg-flash inline-block size-1.5 shrink-0 rounded-full" />
                 <span className="whitespace-nowrap">{site.role}</span>
                 <span className="text-brass/50">/</span>

@@ -210,7 +210,9 @@ export function WorkList({
             {entry.label}
           </button>
         ))}
-        <span className="stage-label ml-auto">{items.length} entries</span>
+        <span className="stage-label ml-auto hidden sm:block">
+          {items.length} entries
+        </span>
       </div>
 
       <div>
