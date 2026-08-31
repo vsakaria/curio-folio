@@ -1,7 +1,18 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { ArrowUpRight } from "lucide-react";
 
 import { Portrait } from "@/components/portrait";
 import { billboard, site, socials } from "@/content/site";
+
+/**
+ * The page is prerendered, so this runs at build time against the real
+ * `public/` directory. Dropping a portrait in and rebuilding is all it takes.
+ */
+function portraitExists(src: string) {
+  if (!src.startsWith("/")) return true;
+  return existsSync(join(process.cwd(), "public", src.slice(1)));
+}
 
 function Billboard() {
   const strip = [...billboard, ...billboard];
@@ -40,6 +51,7 @@ export function Masthead() {
               src={site.portrait.src}
               alt={site.portrait.alt}
               name={site.name}
+              available={portraitExists(site.portrait.src)}
               sizePx={92}
               className="lg:!h-[104px] lg:!w-[104px]"
             />

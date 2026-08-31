@@ -13,17 +13,21 @@ export function Portrait({
   src,
   alt,
   name,
+  available,
   className,
   sizePx = 112,
 }: {
   src: string;
   alt: string;
   name: string;
+  /** Resolved at build time, so a missing file never becomes a 404 request. */
+  available: boolean;
   className?: string;
   sizePx?: number;
 }) {
   const [failed, setFailed] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
+  const showPlate = !available || failed;
 
   // The server-rendered <img> can finish failing before React hydrates, in
   // which case onError never fires. Check the outcome once on mount too.
@@ -49,7 +53,7 @@ export function Portrait({
       )}
       style={{ width: sizePx, height: sizePx }}
     >
-      {failed ? (
+      {showPlate ? (
         <div className="from-oxblood/70 via-ink to-olive/60 flex h-full w-full items-center justify-center bg-gradient-to-br">
           <span
             className="text-brass-bright font-display text-2xl tracking-[0.08em]"

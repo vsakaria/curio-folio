@@ -42,7 +42,9 @@ touching to change what it says.
 ### Your portrait
 
 Drop a square image at `public/portrait.jpg`. Until then the masthead shows a
-monogram plate rather than a broken frame — nothing needs changing in code.
+monogram plate rather than a broken frame, and no request is made for the
+missing file — the check happens at build time, so a new portrait appears on
+the next build.
 
 ### Writing
 
