@@ -14,8 +14,15 @@ npm run dev
 ```
 
 The dev server binds to <http://localhost:4317>. No environment variables are
-needed to run the site — the Instagram pane falls back to a curated set until a
-token is added.
+needed: the Instagram feed is served as public JSON by Behold, and the pane
+falls back to a curated set if that feed cannot be reached.
+
+Two optional variables exist:
+
+| Variable               | Default                                       |
+| ---------------------- | --------------------------------------------- |
+| `BEHOLD_FEED_URL`      | The feed in `src/lib/behold.ts`               |
+| `NEXT_PUBLIC_SITE_URL` | `http://localhost:4317`, for Open Graph URLs  |
 
 Useful scripts:
 
@@ -37,7 +44,27 @@ touching to change what it says.
 | `site.ts`      | Name, role, location, intro, social links, the ticker strip        |
 | `posts.ts`     | Writing shown in the right-hand pane                               |
 | `diagrams.ts`  | System diagrams, declared as data                                  |
-| `frames.ts`    | Curated stills used until Instagram is connected                   |
+| `frames.ts`    | Curated stills used when the live feed cannot be reached           |
+
+### Your photographs
+
+The left pane shows the entries in `src/content/frames.ts` whenever the live
+feed is unavailable. To use your own stills, save each one into
+`public/frames/` named after the `id` of the frame it belongs to —
+`frame-01.jpg` for `frame-01`, `frame-02.jpg` for `frame-02`, and so on. Any of
+`.jpg`, `.jpeg`, `.png`, `.webp` or `.avif` is picked up.
+
+Then edit the `caption`, `location` and `date` on each entry to match the
+photograph. Add or remove entries freely; the grid sizes itself to however many
+there are.
+
+Frames with no matching file are drawn as procedural contact-sheet plates, so a
+half-finished set still looks deliberate. As with the portrait, the check runs
+at build time, so nothing is requested for a photograph you have not added yet
+and the small "not connected" notice disappears once real stills are in place.
+
+Once the live feed is reachable those curated entries are not shown at all —
+they only exist as the fallback.
 
 ### Your portrait
 
@@ -80,41 +107,53 @@ Node `kind` picks the styling: `client`, `edge`, `service`, `store`, `queue` or
 `route: "over"` or `route: "under"` to send a backward or column-skipping edge
 around the outside of the grid so it stays clear of the nodes in between.
 
-## Connecting the Instagram feed
+## The Instagram feed
 
-Instagram's Basic Display API was shut down on 4 December 2024, and **there is
-no longer any supported way to read a personal account's media.** The only
-remaining route is the Instagram API with Instagram Login, which requires a
-professional account.
+The feed comes from [Behold](https://behold.so), not from Instagram directly.
+Instagram's Basic Display API was shut down on 4 December 2024 and the API that
+replaced it needs a professional account, an app review and a long-lived token
+that expires every 60 days. Behold holds all of that, mirrors each still onto
+its own CDN and publishes the account as plain JSON, so this site needs no
+credentials at all and its image URLs do not expire.
 
-Until a token is present the left pane shows the curated stills from
-`src/content/frames.ts`, drawn as procedural contact-sheet plates, and says so
-in a small notice. That is a legitimate state to ship in.
+The feed lives at:
 
-To connect the real feed:
+```
+https://feeds.behold.so/OXLnFevQ5q08FDDC3VH3
+```
 
-1. Convert `@vishisonit` to a **Creator** account in the Instagram app
-   (Settings → Account type). Creator accounts do not need a linked Facebook
-   Page, which makes this the lighter of the two paths.
-2. Create an app at [developers.facebook.com](https://developers.facebook.com/)
-   and add the **Instagram** product, using *Business login for Instagram*.
-3. Request the `instagram_business_basic` scope only. Publishing, messaging and
-   insights scopes are not needed for a read-only feed and slow down App Review.
-4. Exchange the short-lived token for a long-lived one and set it as
-   `INSTAGRAM_ACCESS_TOKEN` in Vercel (Settings → Environment Variables).
+That is the default in `src/lib/behold.ts`. Set `BEHOLD_FEED_URL` to point at a
+different feed — a second account, or a test feed — without touching the code.
+The whole feed is rendered; the pane scrolls independently, so there is no need
+to cap it.
 
-Long-lived tokens last 60 days and must be refreshed before they expire. When
-one lapses the pane falls back to the curated set and shows the reason rather
+`src/lib/behold.ts` reads only what the grid draws:
+
+| Field                | Used for                                              |
+| -------------------- | ----------------------------------------------------- |
+| `sizes.large`        | The still, preferred over `mediaUrl` as it is re-hosted and does not expire |
+| `mediaUrl` (video)   | Playback inside the lightbox, with the still as poster |
+| `children`           | Carousel slides, stepped through in the lightbox       |
+| `caption`            | Tile caption and lightbox title                        |
+| `permalink`          | "Open on Instagram"                                    |
+| `timestamp`          | The date line                                          |
+| `visibility`         | Posts hidden in Behold are skipped                     |
+
+Responses are cached for an hour (`revalidate: 3600`); a portfolio feed does not
+need to be fresher than that. If the feed cannot be reached the pane falls back
+to the curated stills in `src/content/frames.ts` and shows the reason rather
 than breaking.
 
-Responses are cached for an hour (`revalidate: 3600`) because Instagram rate
-limits aggressively and a portfolio feed does not need to be fresher than that.
+Behold serves images from `behold.pictures` and Instagram from
+`*.cdninstagram.com`; both are allowed in `next.config.ts` so `next/image` can
+optimise them.
 
 ## Deploying to Vercel
 
 1. Push this repository and import it at [vercel.com/new](https://vercel.com/new).
    The framework preset, build command and output are all detected.
-2. Add environment variables from `.env.example` — both are optional.
+2. Nothing needs to be configured for the feed. Set `BEHOLD_FEED_URL` only if
+   you are pointing at a different Behold feed.
 3. Add the custom domain and set `NEXT_PUBLIC_SITE_URL` to match, so Open Graph
    tags resolve to absolute URLs.
 
@@ -127,14 +166,14 @@ src/
     masthead        name, portrait, social rail, ticker
     split-stage     the two halves, the spine, the mobile switcher
     pane            shared header + independent scroll body
-    frames-pane     left half: Instagram or curated stills
-    frame-grid      tile grid and lightbox
+    frames-pane     left half: the Instagram feed, or curated stills
+    frame-grid      tile grid and lightbox, including carousels and video
     frame-plate     seeded procedural plate for frames with no photograph
     work-pane       right half: writing and diagrams
     work-list       filtering, cards, reading and diagram dialogs
     system-diagram  spec-driven diagram renderer
   content/        all copy
-  lib/            Instagram fetching, date formatting
+  lib/            Behold feed fetching, date formatting
 ```
 
 The two panes scroll independently above 1024px so both halves stay in view.

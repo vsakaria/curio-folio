@@ -16,20 +16,16 @@ export const site = {
   name: "Vishal Sakaria",
   /** Used for the vertical spine between the two halves. */
   shortName: "Vishal Sakaria",
-  role: "Software Engineer",
+  role: "Senior Solutions Architect at Salesforce",
   location: "London",
   /** Sits directly under the name in the masthead. */
-  tagline: "Systems on one side, film on the other.",
-  /** The longer introduction, kept to two sentences on purpose. */
-  intro:
-    "I build backend systems and the diagrams that make them legible to everyone else in the room. Away from the terminal I shoot on 35mm around Camden and wherever else I end up.",
+  tagline: "Art on one side, technology on the other.",
   portrait: {
     /** Drop a square image at this path in `public/` and it appears automatically. */
     src: "/portrait.jpg",
     alt: "Vishal Sakaria",
   },
   instagramHandle: "vishisonit",
-  email: "hello@example.com",
 } as const;
 
 export const socials: SocialLink[] = [
@@ -50,11 +46,6 @@ export const socials: SocialLink[] = [
     handle: "in/vishalsakaria",
     href: "https://www.linkedin.com/in/vishalsakaria/",
   },
-  {
-    label: "Email",
-    handle: site.email,
-    href: `mailto:${site.email}`,
-  },
 ];
 
 /** The rolling billboard strip beneath the masthead. */
@@ -74,7 +65,7 @@ export const panes = {
     id: "frames",
     kicker: "Left of stage",
     title: "Frames",
-    blurb: "What I point a camera at when nothing is on fire.",
+    blurb: "Music, art, travel and whatever the hell makes me tick.",
   },
   right: {
     id: "work",

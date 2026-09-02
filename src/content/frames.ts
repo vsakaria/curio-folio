@@ -1,10 +1,13 @@
 /**
- * The left-hand pane pulls live posts from Instagram when a token is present
- * (see `src/lib/instagram.ts` and the README). Until then it shows this
- * curated set, drawn as procedural contact-sheet plates rather than stock
- * photography, so the page never renders a broken image.
+ * The left-hand pane pulls live posts from the Behold feed (see
+ * `src/lib/behold.ts` and the README). It shows this curated set when that
+ * feed cannot be reached.
  *
- * Drop real files in `public/frames/` and set `src` to use your own stills.
+ * To use your own photographs, save them into `public/frames/` named after the
+ * `id` of the frame they belong to — `frame-01.jpg` for `frame-01`, and so on.
+ * Any of .jpg, .jpeg, .png, .webp or .avif works. Each one is picked up on the
+ * next build; frames with no file are drawn as procedural contact-sheet plates
+ * instead, so the page never renders a broken image.
  */
 
 export type CuratedFrame = {
@@ -12,7 +15,10 @@ export type CuratedFrame = {
   caption: string;
   location?: string;
   date: string;
-  /** e.g. "/frames/camden-lock.jpg" — optional. */
+  /**
+   * Only needed to point somewhere other than `public/frames/<id>.<ext>`, such
+   * as an image hosted elsewhere.
+   */
   src?: string;
   permalink?: string;
 };

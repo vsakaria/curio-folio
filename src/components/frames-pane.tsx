@@ -3,24 +3,32 @@ import { ArrowUpRight, Info } from "lucide-react";
 import { FrameGrid } from "@/components/frame-grid";
 import { Pane } from "@/components/pane";
 import { panes, site } from "@/content/site";
-import { getInstagramFeed } from "@/lib/instagram";
+import { getFramesFeed } from "@/lib/behold";
 
 function CuratedNotice({ notice }: { notice: string | null }) {
   return (
     <div className="border-brass/25 bg-brass/[0.045] text-bone-dim m-px flex items-start gap-3 border px-4 py-3">
       <Info className="text-brass mt-px size-3.5 shrink-0" />
       <p className="text-[0.72rem] leading-relaxed">
-        {notice ?? "The live feed is not connected yet."} These are curated
-        stills. Add an{" "}
-        <code className="text-brass font-mono">INSTAGRAM_ACCESS_TOKEN</code> and
-        the real grid takes over — the README has the four steps.
+        {notice ?? "The live feed is not connected yet."} These plates stand in
+        for photographs. Save stills into{" "}
+        <code className="text-brass font-mono">public/frames/</code>, or point{" "}
+        <code className="text-brass font-mono">BEHOLD_FEED_URL</code> at a
+        Behold feed for the live grid — the README has both.
       </p>
     </div>
   );
 }
 
 export async function FramesPane() {
-  const feed = await getInstagramFeed(12);
+  // No limit: the pane scrolls on its own, so it carries the whole feed.
+  const feed = await getFramesFeed();
+
+  // Once real photographs are in place the grid speaks for itself, so the
+  // notice is only worth showing while every tile is still a drawn plate.
+  const showNotice =
+    feed.source === "curated" &&
+    feed.items.every((item) => item.slides.every((slide) => !slide.imageUrl));
 
   return (
     <Pane
@@ -42,7 +50,7 @@ export async function FramesPane() {
         </a>
       }
     >
-      {feed.source === "curated" && <CuratedNotice notice={feed.notice} />}
+      {showNotice && <CuratedNotice notice={feed.notice} />}
       <FrameGrid items={feed.items} handle={site.instagramHandle} />
     </Pane>
   );

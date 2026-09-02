@@ -23,7 +23,7 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
-const description = `${site.role} in ${site.location}. ${site.intro}`;
+const description = `${site.role} in ${site.location}. ${site.tagline}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(

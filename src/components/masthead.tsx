@@ -77,16 +77,6 @@ export function Masthead() {
             </div>
           </div>
 
-          {/* The introduction sits alongside the name once there is room for a
-              column, and directly under it when there is not. */}
-          <p className="text-smoke max-w-prose text-[0.8rem] leading-relaxed xl:hidden">
-            {site.intro}
-          </p>
-
-          <p className="text-smoke hidden max-w-[22rem] border-l pl-6 text-[0.8rem] leading-relaxed xl:block">
-            {site.intro}
-          </p>
-
           <nav
             aria-label="Elsewhere"
             className="flex flex-wrap items-center gap-x-5 gap-y-2 lg:ml-auto lg:flex-col lg:items-end lg:gap-y-1.5"
