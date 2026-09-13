@@ -54,7 +54,6 @@ export const billboard: string[] = [
   "Event-driven architecture",
   "35mm",
   "Diagrams that survive the meeting",
-  "Camden",
   "Platform engineering",
   "Darkroom scans",
   "Observability",
